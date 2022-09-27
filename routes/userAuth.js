@@ -3,7 +3,6 @@ const express = require('express')
 const router  = express.Router()
 const User = require('../models/users')
 const bcrypt = require('bcrypt');
-const { findOne } = require('../models/users');
 
 
 router.post('/auth', async (req, res, next) => {
