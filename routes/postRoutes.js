@@ -5,7 +5,7 @@ const { createPost,
         deletePost,
         likeUnlikePost,
         getAPosts,
-        timeline } = require('../controllers/postController')
+        currentUserTimeline } = require('../controllers/postController')
         
 const router = express.Router()
 
@@ -19,7 +19,7 @@ router.route('/:id').put(likeUnlikePost).get(getAPosts)
 
 //router.patch('/:id', likeUnlikePost)
 
-router.route('/:id').get(timeline)
+router.route('/timeline').get(currentUserTimeline)
 
 
 module.exports = router

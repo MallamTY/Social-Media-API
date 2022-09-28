@@ -45,19 +45,33 @@ const editPost = async(req, res) => {
 
 
 const deletePost =  async(req, res) => {
+
+    const {params:{id}, user: {username}} = req;
     try {
-        const post = await Post.findById(req.params.id)
+
+        
+        const post = await Post.findById(id)
+        if(!post){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: `Failed !!!`,
+                message: `Post has already been delted!!!!!!!!!!!`
+            })
+        }
+
         if(post){
-            if(post.userId === req.body.userId){
+            if(post.username === username){
                 await Post.deleteOne()
-                res.status(200).send('Your post has successfully been deleted.............')
+                res.status(StatusCodes.ACCEPTED).json({
+                    status: `Success ...`,
+                    message: `Your post has successfully been deleted.............`
+                })
             }
              else{
-                 res.status(403).send('You can only delete a post made by you!!!!!!!!!!!!!')
+                 res.status(StatusCodes.FORBIDDEN).json({
+                    status: `Failed !!!`,
+                    message: `You can only delete a post made by you!!!!!!!!!!!!!`
+                })
              }
-        }
-        else{
-            res.status(403).send('Post has already been delted!!!!!!!!!!!')
         }
         
     } catch (error) {
@@ -84,32 +98,40 @@ const likeUnlikePost = async(req, res) => {
        // console.log(queryObject);
         let post = await Post.findById(queryObject.id)
         if(!post.likes.includes(queryObject.currentUser)){
-            await Post.findOneAndUpdate({_id: queryObject.id},{$push: {likes: queryObject.currentUser}})
+            const like = await Post.findOneAndUpdate({_id: queryObject.id},{$push: {likes: queryObject.currentUser}}, {new: true})
             res.status(StatusCodes.EXPECTATION_FAILED).json({
                                                            status: 'Successful',
                                                            message: `Liked!!!`,
-                                                           nbLikes: post.likes.length,
-                                                           likes: unlike.likes
+                                                           nbLikes: like.likes.length,
+                                                           likes: like.likes
                                                          })
         }
         else{
-            const unlike = await Post.findOneAndUpdate({_id: queryObject.id},{$pull: {likes: queryObject.currentUser}})
+            const unlike = await Post.findOneAndUpdate({_id: queryObject.id},{$pull: {likes: queryObject.currentUser}}, {new: true})
             res.status(StatusCodes.OK).json({
                                             status: 'Successful',
                                             message: `Unliked !!!`,
-                                            nbLikes: post.likes.length,
+                                            nbLikes: unlike.likes.length,
                                             likes: unlike.likes
                                             })
         }
     } catch (error) {
-        console.log(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error.message)
     }
 }
 
 
 const getAPosts = async(req, res) => {
     try {
-        const post = await Post.findById(req.params.id)
+        const {params: {id}} = req;
+
+        const post = await Post.findById(id);
+        if(!post){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: `Failed !!!`,
+                message: `No related post !!!`
+            })
+        }
         res.status(StatusCodes.OK).json({
                                     status: `Successful`,
                                     post
@@ -120,19 +142,43 @@ const getAPosts = async(req, res) => {
 }
 
 
-const timeline = async(req, res) => {
+const currentUserTimeline = async(req, res) => {
+
+    const {user: {username, currentUser_id}} = req;
+
     try {
-        const currentUser = await User.findById(req.body.userId)
-        const userPost = await Post.find({userId: currentUser._id})
-        const friendPosts = Promise.all(
-            currentUser.following.map((friendId) => {
-                Post.findOne({userId: friendId})
+        const currentUser = await User.findById(currentUser_id);
+        const userPost = await Post.find({username});
+
+        const followersPosts = Promise.all(
+            currentUser.followers.map((friendId) => {
+                Post.find({userId: friendId})
             })
         );
-        res.status(200).send(userPost.concat(...friendPosts))
+
+        const followingPosts = Promise.all(
+            currentUser.following.map((friendId) => {
+                Post.find({userId: friendId})
+            })
+        );
+        res.status(StatusCodes.OK).json({
+            status: 'Timeline feeds loaded, keep scrolling for posts .......',
+            posts: userPost.concat(...followingPosts).concat(...followersPosts)
+        })
     } catch (error) {
         res.status(500).send(error.message)
     }
+}
+
+const viewOtherTimeline = async(req, res) => {
+    const {query: {username}} = req;
+
+    const queryObject = {};
+    if(username) {
+        queryObject.username = username;
+    }
+    const otherUserPost = await Post.find({username: queryObject.username})
+    
 }
 
 
@@ -142,5 +188,6 @@ module.exports = {
     deletePost,
     likeUnlikePost,
     getAPosts,
-    timeline
+   viewOtherTimeline,
+   currentUserTimeline
 }

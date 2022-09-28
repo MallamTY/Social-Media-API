@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const express = require('express');
-const  {registerUser, userLogin, updateProfile}  = require('../controllers/userController');
+const  {registerUser, userLogin, updateProfile, followFollow}  = require('../controllers/userController');
 const router  = express.Router()
 const bcrypt = require('bcrypt');
 const User = require('../models/users');
@@ -12,7 +12,11 @@ router.route('/').post(registerUser)
 
 router.route('/login').post(userLogin)
 
-router.route('/:username').patch(userAuthentication, updateProfile)
+router.use(userAuthentication)
+
+router.route('/:username').patch( updateProfile)
+
+router.route('/:id').put(followFollow)
 
 
 // router.put('/updates/:id', async (req, res, next) => {

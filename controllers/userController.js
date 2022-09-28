@@ -102,12 +102,56 @@ const userLogin = async(req, res) => {
         const token = createToken(user._id, user.username)
         res.status(StatusCodes.ACCEPTED).json({
             status: `Success .....`,
-            message: `Login successful`,
+            message: `Welcome back ${user.username}`,
             token
         })
         
     } catch (error) {
        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error.message)
+    }
+}
+
+const followFollow = async(req, res) => {
+    try {
+        const {user: {currentUser_id},
+                params: {id}} = req;
+
+        const queryObject = {};
+
+        if (currentUser_id) {
+            queryObject.currentUser = currentUser_id;
+        }
+        if(id) {
+            queryObject.id = id
+        }
+       // console.log(queryObject);
+        let currrentUser = await User.findById(queryObject.currentUser);
+        if(!currrentUser.following.includes(queryObject.id)){
+
+            const followings = await User.findOneAndUpdate({_id: queryObject.currentUser},{$push: {following: queryObject.id}}, {new: true});
+            await User.findOneAndUpdate({_id: id},{$push: {followers: queryObject.currentUser}}, {new: true});
+
+            res.status(StatusCodes.OK).json({
+                                            status: 'Successful',
+                                            message: `Followed !!!`,
+                                            nbFollowers: followings.following.length,
+                                            following: followings.following,
+                                        });
+            }
+            else{
+            const followings = await User.findOneAndUpdate({_id: queryObject.currentUser},{$pull: {following: queryObject.id}}, {new: true});
+            await User.findOneAndUpdate({_id: id},{$pull: {followers: queryObject.currentUser}}, {new: true});
+
+            res.status(StatusCodes.OK).json({
+                                            status: 'Successful',
+                                            message: `Unfollowed !!!`,
+                                            nbFollowers: followings.following.length,
+                                            following: followings.following,
+                                        });
+            }
+       
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error.message)
     }
 }
 
@@ -150,5 +194,6 @@ const updateProfile = async(req, res) => {
 module.exports = {
     registerUser,
     userLogin,
-    updateProfile
+    updateProfile,
+    followFollow
 }
