@@ -150,23 +150,26 @@ const currentUserTimeline = async(req, res) => {
         const currentUser = await User.findById(currentUser_id);
         const userPost = await Post.find({username});
 
-        const followersPosts = Promise.all(
-            currentUser.followers.map((friendId) => {
-                Post.find({userId: friendId})
-            })
-        );
+        // const followersPosts = Promise.all(
+        //     currentUser.followers.map((friendId) => {
+        //         return Post.find({userId: friendId})
+        //     })
+        // );
 
-        const followingPosts = Promise.all(
-            currentUser.following.map((friendId) => {
-                Post.find({userId: friendId})
-            })
-        );
-        res.status(StatusCodes.OK).json({
-            status: 'Timeline feeds loaded, keep scrolling for posts .......',
-            posts: userPost.concat(...followingPosts).concat(...followersPosts)
-        })
+         const followingPosts = Promise.all(
+             currentUser.following.map((friendId) => {
+                 return Post.find({userId: friendId})
+                 
+             })
+         );
+         
+
+         const awaitedFollow = await followingPosts
+         
+        res.status(StatusCodes.OK).json(userPost.concat(...awaitedFollow))//.concat(...followersPosts)
+        //)
     } catch (error) {
-        res.status(500).send(error.message)
+        res.status(500).send(error)
     }
 }
 
