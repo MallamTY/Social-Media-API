@@ -111,8 +111,44 @@ const userLogin = async(req, res) => {
     }
 }
 
+const updateProfile = async(req, res) => {
+    try {
+        const {password, confirmPassword} = req.body;
+
+        if(!validator.isStrongPassword(password) || !validator.isStrongPassword(confirmPassword)){
+            return res.status(StatusCodes.EXPECTATION_FAILED).json({
+                message: `Password not strong enough !!!`
+            })
+        }
+
+        if (password !== confirmPassword) {
+            return res.status(StatusCodes.EXPECTATION_FAILED).json({
+                message: `Password doesn't match !!!`
+        })  
+        }
+
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedConfirmPassword = await bcrypt.hash(confirmPassword, salt);
+
+
+
+        const updatedUser = await User.findOneAndUpdate({username: req.params.username}, {...req.body, password:hashedPassword, confirmPassword:hashedConfirmPassword}, {new: true})
+
+        res.status(StatusCodes.OK).json({
+            status: `Success ...`,
+            message: `Profile updated`,
+            updatedUser
+        })
+
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error.message)
+    }
+}
+
 
 module.exports = {
     registerUser,
-    userLogin
+    userLogin,
+    updateProfile
 }

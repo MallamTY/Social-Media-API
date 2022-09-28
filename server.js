@@ -14,7 +14,7 @@ app.use(helmet());
 app.use(morgan("common"))
 app.use('/app/api', userRoutes);
 app.use('/api', userAuth);
-app.use('/api', postRoutes);
+app.use('/app/api', postRoutes);
 
 
 const start = async() => {

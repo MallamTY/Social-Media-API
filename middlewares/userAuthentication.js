@@ -7,9 +7,9 @@ exports.userAuthentication = async(req, res, next) => {
         const {authorization} = req.headers
 
         if(!authorization){
-            return res.status(StatusCodes.BAD_REQUEST).json({
+            return res.status(StatusCodes.EXPECTATION_FAILED).json({
                 status: `Failed !!!`,
-                message: `Authorization token required !!!`
+                message: `Required token not available !!!`
             })
         }
 
@@ -23,7 +23,7 @@ exports.userAuthentication = async(req, res, next) => {
             })
         }
 
-        req.user = {user_id: payload.id, username: payload.username};
+        req.user = {currentUser_id: payload.id, username: payload.username};
         next()
 
     } catch (error) {

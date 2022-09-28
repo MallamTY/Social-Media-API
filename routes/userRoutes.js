@@ -1,15 +1,18 @@
 const mongoose = require('mongoose')
 const express = require('express');
-const  {registerUser, userLogin}  = require('../controllers/userController');
+const  {registerUser, userLogin, updateProfile}  = require('../controllers/userController');
 const router  = express.Router()
 const bcrypt = require('bcrypt');
 const User = require('../models/users');
+const { userAuthentication } = require('../middlewares/userAuthentication');
 
 
 
 router.route('/').post(registerUser)
 
 router.route('/login').post(userLogin)
+
+router.route('/:username').patch(userAuthentication, updateProfile)
 
 
 // router.put('/updates/:id', async (req, res, next) => {

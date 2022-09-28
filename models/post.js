@@ -3,14 +3,19 @@ const mongoose = require('mongoose');
 const schema = mongoose.Schema;
 
  const postSchema = new schema({
-     userId: {
+     username: {
          type: String,
          required:true
      },
 
+     userId: {
+        type: String,
+        required:true
+    },
+
      description: {
          type: String,
-         max: 50
+         max: 255
      },
 
      image: {

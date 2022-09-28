@@ -15,7 +15,9 @@ router.route('/posts').post(createPost)
 
 router.route('/post/:id').post(editPost).delete(deletePost)
 
-router.route('/:id').patch(likeUnlikePost).get(getAPosts)
+router.route('/:id').put(likeUnlikePost).get(getAPosts)
+
+//router.patch('/:id', likeUnlikePost)
 
 router.route('/:id').get(timeline)
 
