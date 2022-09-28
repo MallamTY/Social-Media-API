@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const dotenv = require('dotenv').config();
 const userRoutes = require('./routes/userRoutes')
 const userAuth = require('./routes/userAuth')
-//const postRoutes = require('./routes/postRoutes');
+const postRoutes = require('./routes/postRoutes');
 const { connectDB } = require('./db/dbConfig');
 const { MONGO_URI, PORT } = require('./configuration/configurations');
 
@@ -14,7 +14,7 @@ app.use(helmet());
 app.use(morgan("common"))
 app.use('/app/api', userRoutes);
 app.use('/api', userAuth);
-//app.use('/api', postRoutes);
+app.use('/api', postRoutes);
 
 
 const start = async() => {
