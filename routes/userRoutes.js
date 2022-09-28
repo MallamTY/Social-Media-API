@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const express = require('express');
-const  {registerUser}  = require('../controllers/userController');
+const  {registerUser, userLogin}  = require('../controllers/userController');
 const router  = express.Router()
 const bcrypt = require('bcrypt');
 const User = require('../models/users');
@@ -8,6 +8,8 @@ const User = require('../models/users');
 
 
 router.route('/').post(registerUser)
+
+router.route('/login').post(userLogin)
 
 
 // router.put('/updates/:id', async (req, res, next) => {

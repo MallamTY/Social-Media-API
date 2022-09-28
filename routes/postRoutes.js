@@ -1,21 +1,23 @@
 const express = require('express');
+const { userAuthentication } = require('../middlewares/userAuthentication');
 const { createPost, 
         editPost,
         deletePost,
         likeUnlikePost,
         getAPosts,
-        timeline } = require('../controllers/controllers');
+        timeline } = require('../controllers/postController')
         
 const router = express.Router()
 
+router.use(userAuthentication)
 
-router.use('/posts').post(createPost)
+router.route('/posts').post(createPost)
 
-router.use('/post/:id').post(editPost).delete(deletePost)
+router.route('/post/:id').post(editPost).delete(deletePost)
 
-router.use('/:id').patch(likeUnlikePost).get(getAPosts)
+router.route('/:id').patch(likeUnlikePost).get(getAPosts)
 
-router.get('/:id').get(timeline)
+router.route('/:id').get(timeline)
 
 
 module.exports = router

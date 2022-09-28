@@ -2,6 +2,7 @@ const User = require('../models/users');
 const validator = require('validator');
 const { StatusCodes } = require('http-status-codes')
 const bcrypt = require('bcrypt');
+const { createToken } = require('../accessories/otpGenerator');
 
 
 
@@ -68,6 +69,50 @@ const registerUser = async(req, res) => {
    
 }
 
+const userLogin = async(req, res) => {
+    const {username, email, password} = req.body
+
+    try {
+        if(!(username || email) || !password){
+            return res.status(StatusCodes.EXPECTATION_FAILED).json({
+                status: `Failed !!!`,
+                message: `All filed must be field`
+            })
+        }
+    
+        const user = await User.findOne({$or: [{username}, {email}]})
+    
+        if(!user){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: `Failed !!!`,
+                message: `Incorrect email and/or password`
+            })
+        }
+    
+        const match = await bcrypt.compare(password, user.password)
+
+        if(!match){
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: `Failed !!!`,
+                message: `Incorrect email and/or password`
+    
+            })
+        }
+
+        const token = createToken(user._id, user.username)
+        res.status(StatusCodes.ACCEPTED).json({
+            status: `Success .....`,
+            message: `Login successful`,
+            token
+        })
+        
+    } catch (error) {
+       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error.message)
+    }
+}
+
+
 module.exports = {
-    registerUser
+    registerUser,
+    userLogin
 }
